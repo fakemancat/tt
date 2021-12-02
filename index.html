@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    <style>
+        .gap {
+            margin: 5px;
+        }
+    </style>
+    <title>Крестики нолики</title>
+</head>
+<body style="background-color: #15171a;">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container align-middle">
+            <div style="display: flex; align-items: center;">
+                <img width="40" src="tt.svg" style="filter: invert(100%);">&#12288;
+                <h3 style="margin: 0;" class="text-white">Tik Tak</h3>
+            </div>
+            <!-- <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button> -->
+            <!-- <div class="collapse navbar-collapse" id="navbarSupportedContent"> -->
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <!-- <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#">Home</a>
+                    </li> -->
+                </ul>
+                <span class="navbar-text">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span id="name">Не авторизован</span>
+                            <img id="avatar" width="40" src="profile.png" class="rounded" alt="...">
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-dark">
+                            <li>
+                                <a class="dropdown-item">
+                                    Статус: <span id="status" class="badge bg-danger">Офлайн</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a id="rating" class="dropdown-item"></a>
+                            </li>
+                            <li>
+                                <a id="type" class="dropdown-item"></a>
+                            </li>
+                            <li>
+                                <button id="reconnect" class="dropdown-item">Переподключиться</button>
+                            </li>
+                        </ul>
+                    </div>
+                </span>
+            <!-- </div> -->
+        </div>
+    </nav>
+
+    <br>
+
+    <div class="container" style="padding: 15px; border-radius: 10px;">
+        <div class="row align-middle">
+            <div class="col-xl-4 text-center">
+                <div style="display: flex; justify-content: center;">
+                    <h3 class="text-white">Таблица лидеров</h3>&#12288;
+                    <img id="reloadLeaders" src="reload.svg" style="filter: invert(100%); cursor: pointer;" alt="" width="25">
+                </div>
+
+                <table class="text-start table table-dark table-striped">
+                    <tbody id="ratingList">
+                        
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="col text-center">
+                <h3 class="text-white">Игра</h3>
+
+                <div class="card text-white bg-dark">
+                    <div class="card-body">
+                        <p class="card-text">
+                            Для начала игры, Вам необходимо запустить поиск игровой сессии по кнопке ниже.
+                            <br>
+                            После запуска игры случайным образом будет выбран игрок, который будет ходить первым.
+                        </p>
+                        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                            <button id="find-session" class="btn btn-primary">Поиск игрока</button>
+                            &#12288;
+                            <div id="spinner" hidden="" style="display: flex; align-items: center;">
+                                <div class="spinner-border text-primary" role="status">
+                                </div>&#12288;
+                                <span>Поиск игрока...</span>
+                            </div>
+                            <span hidden="" id="whoStep"></span>
+                            <span hidden="" id="opponent"></span>
+                            <canvas hidden="" id="game" width="300" height="300"></canvas>
+                        </div>
+                    </div>
+                    <div class="card-footer text-muted">
+                        Web-version by Дмитрий Брюханов
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Button trigger modal -->
+    <!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+        Launch static backdrop modal
+    </button> -->
+    
+    <!-- Modal -->
+    <div class="modal fade bg-dark" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Авторизация</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group flex-nowrap">
+                        <span class="input-group-text" id="addon-wrapping">https://vk.com/id</span>
+                        <input id="userId" type="text" class="form-control" placeholder="Айди пользователя ВК" aria-label="Username" aria-describedby="addon-wrapping">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="login">Войти</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="errorModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Уведомление</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <span id="errorMessage">
+                        Ошибка
+                    </span>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * @returns {HTMLElement}
+         */
+        const $ = (el) => document.querySelector(el);
+        const myModal = new bootstrap.Modal($('#staticBackdrop'));
+        const errorModal = new bootstrap.Modal($('#errorModal'));
+
+        function drawX(ctx, position) {
+            const x = [0, 100, 200, 0, 100, 200, 0, 100, 200][position];
+            const y = [0, 0, 0, 100, 100, 100, 200, 200, 200][position];
+
+            ctx.strokeStyle = '#FF0000';
+            ctx.lineWidth = 7;
+            ctx.lineCap = 'round';
+
+            ctx.beginPath();
+            ctx.moveTo(10 + x, 10 + y); 
+            ctx.lineTo(90 + x, 90 + y); 
+
+            ctx.moveTo(90 + x, 10 + y); 
+            ctx.lineTo(10 + x, 90 + y);
+            ctx.stroke(); 
+
+            ctx.strokeStyle = '#000000';
+        }
+
+        function drawO(ctx, position) {
+            const x = [0, 100, 200, 0, 100, 200, 0, 100, 200][position];
+            const y = [0, 0, 0, 100, 100, 100, 200, 200, 200][position];
+
+            ctx.strokeStyle = '#001eff';
+            ctx.lineWidth = 7;
+
+            ctx.beginPath();
+            ctx.arc(50 + x, 50 + y, 40, 0, Math.PI*2); 
+            ctx.stroke();
+            ctx.strokeStyle = '#000000';
+        }
+
+        /**
+         * @param {number[][]} gameField
+         */
+        function drawGrid(gameField) {
+            const canvas = $('#game');
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = 'rgb(255, 255, 255)';
+            ctx.fillRect(0, 0, 500, 500)
+
+            ctx.fillStyle = 'rgb(0, 0, 0)';
+            ctx.lineWidth = 5; 
+            ctx.beginPath();
+
+            // Линии
+            ctx.moveTo(100, 0); 
+            ctx.lineTo(100, 500);
+            ctx.moveTo(200, 0); 
+            ctx.lineTo(200, 500); 
+            ctx.moveTo(0, 100); 
+            ctx.lineTo(500, 100); 
+            ctx.moveTo(0, 200); 
+            ctx.lineTo(500, 200);
+
+            // Обводка
+            ctx.moveTo(0, 0);
+            ctx.lineTo(300, 0);
+            ctx.lineTo(300, 300);
+            ctx.lineTo(0, 300);
+            ctx.lineTo(0, 0);
+
+            ctx.stroke();
+
+            gameField = gameField.flat(2);
+
+            for (let i in gameField) {
+                if (gameField[i] === 1) drawX(ctx, i);
+                if (gameField[i] === 2) drawO(ctx, i);
+            }
+        }
+
+        $('#game').addEventListener('click', e => {
+            let x = e.layerX > 0 && e.layerX < 100 ? 0 : e.layerX > 100 && e.layerX < 200 ? 1 : 2;
+            let y = e.layerY > 0 && e.layerY < 100 ? 0 : e.layerY > 100 && e.layerY < 200 ? 1 : 2;
+
+            console.log(x, y);
+            ws.send(JSON.stringify({
+                action: 'step',
+                payload: { x, y }
+            }));
+        });
+        
+        function updateUser(user) {
+            $('#rating').innerHTML = 'Рейтинг: ' + user.rating + ' <img width="20" src="rating.png" class="rounded" alt="...">';
+            $('#type').innerText = user.type === 'owner' ? 'Владелец' : 'Игрок';
+            $('#avatar').src = user.photoURL;
+            $('#name').innerText = `${user.firstName} ${user.lastName}`;
+        }
+
+        function dispatchMessage(data) {
+            if (data === 'ping') return;
+
+            const { action, status, payload } = JSON.parse(data);
+
+            if (status === 'error') {
+                $('#errorMessage').innerText = payload.message;
+                errorModal.show();
+            }
+
+            const userId = localStorage.getItem('userId');
+
+            switch (action) {
+                case 'getUser':
+                    updateUser(payload);
+                    break;
+                case 'initApplication':
+                    updateUser(payload.user);
+                    break;
+                case 'getLeaders':
+                    $('#ratingList').innerHTML = '';
+                    let string = '';
+
+                    for (const i in payload) {
+                        const user = payload[i];
+
+                        if (user.id == userId) {
+                            updateUser(user);
+                        }
+
+                        string += `
+                            <tr class="align-middle">
+                                <th scope="row">${+i + 1}</th>
+                                <td>
+                                    <img width="40" src="${user.photoURL}" class="rounded" alt="...">
+                                    ${user.firstName} ${user.lastName} ${user.type === 'owner' ? '&#10004;' : ''}
+                                </td>
+                                <td>
+                                    ${user.rating}
+                                    <img width="20" src="rating.png" class="rounded" alt="...">
+                                </td>
+                            </tr>
+                        `
+                    }
+
+                    $('#ratingList').innerHTML = string;
+
+                    break;
+                case 'find-player':
+                    if (payload.status === 'find') {
+                        $('#find-session').hidden = true;
+                        $('#spinner').removeAttribute('hidden');
+                    }
+
+                    if (payload.status === 'in-progress') {
+                        $('#spinner').hidden = true;
+                        $('#find-session').hidden = true;
+                        
+                        if (payload.nowPlayerId == userId) {
+                            $('#whoStep').innerText = 'Сейчас Ваш ход';
+                        } else {
+                            $('#whoStep').innerText = 'Сейчас ход соперника';
+                        }
+
+                        let opponent;
+
+                        if (payload.firstPlayerId == userId) {
+                            opponent = payload.secondPlayer;
+                        } else {
+                            opponent = payload.firstPlayer;
+                        }
+
+                        console.log(opponent);
+                        
+                        $('#opponent').removeAttribute('hidden');
+                        $('#opponent').innerText = `Ваш соперник ${opponent.firstName} ${opponent.lastName}`;
+                        $('#whoStep').removeAttribute('hidden');
+                        $('#game').removeAttribute('hidden');
+                        drawGrid(JSON.parse(payload._gameField));
+                    }
+
+                    break;
+                case 'step':
+                    if (payload.nowPlayerId == userId) {
+                        $('#whoStep').innerText = 'Сейчас Ваш ход';
+                    } else {
+                        $('#whoStep').innerText = 'Сейчас ход соперника';
+                    }
+
+                    drawGrid(JSON.parse(payload._gameField));
+                    break;
+                case 'gameState':
+                    const state = payload.state;
+                    drawGrid(JSON.parse(payload.session._gameField));
+
+                    setTimeout(() => {
+                        if (state === 'win') {
+                            $('#errorMessage').innerText = 'Поздравляем! Вы победили\nВам начислено 5 очков рейтинга';
+                            errorModal.show();
+                        }
+    
+                        else if (state === 'loss') {
+                            $('#errorMessage').innerText = 'К сожалению Вы проиграли\nУ Вас списано 3 очка рейтинга';
+                            errorModal.show();
+                        }
+    
+                        else if (state === 'draw') {
+                            $('#errorMessage').innerText = 'Победила дружба!\nКаждому игроку начислено 1 очко рейтинга';
+                            errorModal.show();
+                        }
+
+                        $('#spinner').hidden = true;
+                        $('#find-session').removeAttribute('hidden');
+                        $('#whoStep').hidden = true;
+                        $('#find-session').removeAttribute('disabled');
+                        $('#game').hidden = true;
+                        $('#opponent').hidden = true;
+                    }, 1000);
+
+                    ws.send(JSON.stringify({
+                        action: 'getLeaders'
+                    }));
+                    ws.send(JSON.stringify({
+                        action: 'getUser'
+                    }));
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        function startWS(userId) {
+            if ([0, 1].includes(window.ws?.readyState)) window.ws.close(1000, 'Other Connection');
+
+            const ws = new WebSocket(
+                `wss://ods-studio.ru/tt/socket?vk_user_id=${userId}`
+            );
+
+            ws.onopen = () => {
+                $('#status').innerText = 'Онлайн';
+                $('#status').classList.replace('bg-danger', 'bg-success');
+
+                ws.send(JSON.stringify({
+                    action: 'getLeaders'
+                }));
+
+                ws.onmessage = ({ data }) => dispatchMessage(data);
+            };
+
+            ws.onclose = (e) => {
+                $('#status').innerText = 'Офлайн';
+                $('#status').classList.replace('bg-success', 'bg-danger');
+
+                console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
+                if (e.reason === 'Other Connection') return;
+                
+                setTimeout(startWS, 1000, userId);
+            };
+
+            ws.onerror = () => {
+                console.error('Socket encountered error. Closing socket');
+                ws.close();
+            };
+
+            window.ws = ws;
+        }
+
+        function startWsWithUserId() {
+            console.log(window.location.search);
+            const params = new URLSearchParams(window.location.search);
+
+            if (params.has('vk_user_id')) {
+                localStorage.setItem('userId', params.get('vk_user_id'));
+                startWS(params.get('vk_user_id'));
+            } else {
+                const userId = localStorage.getItem('userId');
+        
+                $('#login').addEventListener('click', (e) => {
+                    e.preventDefault();
+        
+                    const userId = $('#userId').value;
+                    startWS(userId);
+                    localStorage.setItem('userId', userId);
+                    myModal.hide();
+                });
+        
+                if (!userId) {
+                    myModal.show();
+                } else {
+                    startWS(userId);
+                }
+            }
+        }
+
+        $('#reconnect').addEventListener('click', (e) => {
+            startWsWithUserId();
+        });
+
+        $('#find-session').addEventListener('click', (e) => {
+            $('#find-session').disabled = true;
+
+            ws.send(JSON.stringify({
+                action: 'find-player'
+            }));
+        });
+
+        $('#reloadLeaders').addEventListener('click', e => {
+            ws.send(JSON.stringify({
+                action: 'getLeaders'
+            }));
+        });
+
+        startWsWithUserId();
+    </script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+    "name": "tt-front",
+    "author": {
+        "email": "bryuhanovdima@yandex.ru",
+        "name": "Fakeman Cat",
+        "url": "https://vk.com/fakeman.cat_fmc"
+    },
+    "main": "index.html",
+    "homepage": "."
+}
